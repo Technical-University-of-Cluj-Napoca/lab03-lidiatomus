@@ -4,14 +4,13 @@ from utils import *
 from grid import Grid
 from searching_algorithms import *
 
-# === COLORS ===
+
 WHITE = (255, 255, 255)
 LIGHT_GREY = (245, 245, 245)
 DARK_GREY = (50, 50, 50)
 BLACK = (20, 20, 20)
-BG_COLOR = (255, 220, 230)  # soft pink background
+BG_COLOR = (255, 220, 230)  
 
-# === BUTTON COLORS ===
 BUTTON_COLORS = {
     "BFS": (173, 216, 230),
     "DFS": (255, 182, 193),
@@ -25,7 +24,6 @@ BUTTON_COLORS = {
 
 SIDE_PANEL_WIDTH = 160
 BOTTOM_BAR_HEIGHT = 90
-
 
 def draw_legend(win, font, selected_algo):
     """Draws legend instructions at the bottom."""
@@ -86,9 +84,9 @@ if __name__ == "__main__":
     pygame.font.init()
     font = pygame.font.SysFont("Arial", 18)
 
-    clock = pygame.time.Clock()  # <-- add this
+    clock = pygame.time.Clock()  
 
-    # === Create clickable algorithm buttons ===
+    # algorithm buttons 
     algo_names = ["BFS", "DFS", "ASTAR", "DLS", "UCS", "greedy", "ids", "ida"]
     buttons = []
     for i, name in enumerate(algo_names):
@@ -116,14 +114,10 @@ if __name__ == "__main__":
                 run = False
                 break
 
-            # --- removed: if started: continue ---
-            # we let algorithms handle QUIT via _handle_quit and avoid swallowing other events here
-
-            # mouse down: set state and handle single clicks (buttons / start/end / barrier)
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
-                # button click has priority
-                if event.button == 1:  # left
+                if event.button == 1: 
                     if point_on_buttons(pos):
                         for rect, name in buttons:
                             if rect.collidepoint(pos):
@@ -131,7 +125,6 @@ if __name__ == "__main__":
                                 print(f"Selected {name}")
                                 break
                     else:
-                        # start drawing on grid if inside
                         if pos[0] < grid_width and pos[1] < grid_height:
                             row, col = grid.get_clicked_pos(pos)
                             if 0 <= row < ROWS and 0 <= col < COLS:
@@ -146,8 +139,7 @@ if __name__ == "__main__":
                                     spot.make_barrier()
                     mouse_down_left = True
 
-                elif event.button == 3:  # right
-                    # right-click to erase if inside grid
+                elif event.button == 3: 
                     if pos[0] < grid_width and pos[1] < grid_height:
                         row, col = grid.get_clicked_pos(pos)
                         if 0 <= row < ROWS and 0 <= col < COLS:
@@ -159,17 +151,14 @@ if __name__ == "__main__":
                                 end = None
                     mouse_down_right = True
 
-            # mouse up: stop dragging
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     mouse_down_left = False
                 elif event.button == 3:
                     mouse_down_right = False
 
-            # mouse motion: draw while dragging (smooth drawing)
             elif event.type == pygame.MOUSEMOTION:
                 pos = event.pos
-                # ignore motions over buttons to avoid glitches
                 if point_on_buttons(pos):
                     continue
                 if pos[0] < grid_width and pos[1] < grid_height:
@@ -177,7 +166,6 @@ if __name__ == "__main__":
                     if 0 <= row < ROWS and 0 <= col < COLS:
                         spot = grid.grid[row][col]
                         if mouse_down_left:
-                            # don't overwrite start/end
                             if spot != start and spot != end:
                                 spot.make_barrier()
                         elif mouse_down_right:
@@ -187,7 +175,6 @@ if __name__ == "__main__":
                             elif spot == end:
                                 end = None
 
-            # keyboard controls
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
@@ -217,24 +204,21 @@ if __name__ == "__main__":
                                 spot.update_neighbors(grid.grid)
                         algo_fn = algo_map.get(selected_algo)
                         if algo_fn:
-                            # prevent sticky mouse state (do NOT clear event queue)
                             mouse_down_left = False
                             mouse_down_right = False
 
-                            # provide algorithms a full redraw function so buttons/legend update
                             def draw_all():
                                 WIN.fill(BG_COLOR)
                                 grid.draw()
                                 draw_buttons(WIN, font, buttons, selected_algo)
                                 draw_legend(WIN, font, selected_algo)
-                                pygame.display.flip()        # use flip
-                                clock.tick(60)              # limit to 60 FPS to avoid flicker/cpu spike
+                                pygame.display.flip()       
+                                clock.tick(60)              
 
                             started = True
                             result = algo_fn(draw_all, grid, start, end)
                             started = False
 
-                            # reset mouse state after algorithm (no event.clear)
                             mouse_down_left = False
                             mouse_down_right = False
 

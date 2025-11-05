@@ -6,24 +6,10 @@ from grid import Grid
 from spot import Spot
 
 def _handle_quit():
-    """
-    Non-consuming quit detector used inside algorithms.
-    Returns True if a QUIT event is pending, but does NOT remove events
-    so the main loop still receives mouse/keyboard events after the algorithm.
-    """
     return pygame.event.peek(pygame.QUIT)
 # 1 ▢ Breadth-First Search (BFS)
 def bfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    Breadth-First Search (BFS) Algorithm.
-    Args:
-        draw (callable): A function to call to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise.
-    """
+    
     queue = deque([start])
     visited = {start}
     came_from = {}
@@ -60,16 +46,7 @@ def bfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
 pass
 #2 ▢ Depth-First Search (DFS)
 def dfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    Depth-First Search (DFS) Algorithm.
-    Args:
-        draw (callable): Function to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise.
-    """
+    
     stack = [start]
     visited = {start}
     came_from = {}
@@ -130,16 +107,7 @@ def h_euclidian_distance(p1: tuple[int, int], p2: tuple[int, int]) -> float:
 pass
 #3 ▢ A* Search Algorithm
 def astar(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    A* Pathfinding Algorithm.
-    Args:
-        draw (callable): A function to call to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise.
-    """
+    
     counter = count()
     open_set = PriorityQueue()
     open_set.put((0, next(counter), start))
@@ -192,14 +160,8 @@ pass
 # and the others algorithms...
 #4 ▢ Depth-Limited Search (DLS)
 def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
-    """
-    Depth-Limited Search (DLS) - iterative path-aware version.
-    Uses full path objects on the stack so "visited" is checked per path (avoids cycles),
-    allowing the same node to be explored along different paths up to the depth limit.
-    """
-    # stack contains tuples (path_list, depth)
+    
     stack = [([start], 0)]
-    # came_from not needed because the path itself stores predecessors
 
     while stack:
         if _handle_quit():
@@ -209,7 +171,6 @@ def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
         current = path[-1]
 
         if current == end:
-            # mark path (skip start)
             for spot in path[:-1]:
                 if spot != start and spot != end:
                     spot.make_path()
@@ -222,7 +183,6 @@ def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
             for neighbor in current.neighbors:
                 if neighbor in path or neighbor.is_barrier():
                     continue
-                # push a new path with neighbor appended
                 new_path = path + [neighbor]
                 stack.append((new_path, depth + 1))
                 neighbor.make_open()
@@ -236,16 +196,7 @@ def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
 
 #5 ▢ Uninformed Cost Search (UCS)
 def ucs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    Uninformed Cost Search (UCS) Algorithm.
-    Args:
-        draw (callable): A function to call to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise.
-    """
+
     counter = count()
     open_set = PriorityQueue()
     open_set.put((0, next(counter), start))
@@ -261,7 +212,6 @@ def ucs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
         open_set_hash.discard(current)
 
         if current == end:
-            # reconstruct path
             while current in came_from:
                 current = came_from[current]
                 if current != start:
@@ -292,16 +242,7 @@ def ucs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     pass
 #6 ▢ Greedy Search
 def greedy_search(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    Greedy Best-First Search Algorithm.
-    Args:
-        draw (callable): A function to call to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise. ALSO NEEDS FIXES
-    """
+    
     counter = count()
     open_set = PriorityQueue()
     open_set.put((0, next(counter), start))
@@ -346,10 +287,7 @@ def greedy_search(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
 
 #7 ▢ Iterative Deepening Search/Iterative Deepening Depth-First Search (IDS/IDDFS)
 def ids(draw: callable, grid: Grid, start: Spot, end: Spot, max_depth: int) -> bool:
-    """
-    Iterative Deepening Search (IDS) Algorithm.
-    Performs a series of depth-limited DFS passes up to max_depth.
-    """
+    
     for depth in range(max_depth + 1):
         stack = [(start, 0)]
         visited = {start}
@@ -387,16 +325,7 @@ def ids(draw: callable, grid: Grid, start: Spot, end: Spot, max_depth: int) -> b
 
 # 8 ▢ Iterative Deepening A* (IDA)
 def ida(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
-    """
-    Iterative Deepening A* (IDA*) Algorithm.
-    Args:
-        draw (callable): Function to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-    Returns:
-        bool: True if a path is found, False otherwise.
-    """
+   
     threshold = h_manhattan_distance((start.row, start.col), (end.row, end.col))
 
     def search(path: list[Spot], g: float, threshold: float) -> float | bool:
@@ -440,4 +369,3 @@ def ida(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
             return False
         threshold = temp
     pass
-# Assume that each edge (graph weight) equalss
