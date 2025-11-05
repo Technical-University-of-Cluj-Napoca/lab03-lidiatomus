@@ -6,12 +6,12 @@ from grid import Grid
 from spot import Spot
 
 def _handle_quit():
-    for ev in pygame.event.get():
-        if ev.type == pygame.QUIT:
-           # pygame.quit()
-            return True
-    return False
-pass
+    """
+    Non-consuming quit detector used inside algorithms.
+    Returns True if a QUIT event is pending, but does NOT remove events
+    so the main loop still receives mouse/keyboard events after the algorithm.
+    """
+    return pygame.event.peek(pygame.QUIT)
 # 1 ▢ Breadth-First Search (BFS)
 def bfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
