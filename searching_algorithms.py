@@ -8,11 +8,11 @@ from spot import Spot
 def _handle_quit():
     for ev in pygame.event.get():
         if ev.type == pygame.QUIT:
-            pygame.quit()
+           # pygame.quit()
             return True
     return False
 pass
-
+# 1 ▢ Breadth-First Search (BFS)
 def bfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     Breadth-First Search (BFS) Algorithm.
@@ -58,7 +58,7 @@ def bfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
 
     return False
 pass
-
+#2 ▢ Depth-First Search (DFS)
 def dfs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     Depth-First Search (DFS) Algorithm.
@@ -128,7 +128,7 @@ def h_euclidian_distance(p1: tuple[int, int], p2: tuple[int, int]) -> float:
     """
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 pass
-
+#3 ▢ A* Search Algorithm
 def astar(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     A* Pathfinding Algorithm.
@@ -190,35 +190,29 @@ def astar(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     return False
 pass
 # and the others algorithms...
-# ▢ Depth-Limited Search (DLS)
+#4 ▢ Depth-Limited Search (DLS)
 def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
     """
-    Depth-Limited Search (DLS) Algorithm. NEED S FIXES MAYBE
-    Args:
-        draw (callable): Function to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-        limit (int): The depth limit for the search.
-    Returns:
-        bool: True if a path is found, False otherwise.
+    Depth-Limited Search (DLS) - iterative path-aware version.
+    Uses full path objects on the stack so "visited" is checked per path (avoids cycles),
+    allowing the same node to be explored along different paths up to the depth limit.
     """
-    stack = [(start, 0)]
-    visited = {start}
-    came_from = {}
+    # stack contains tuples (path_list, depth)
+    stack = [([start], 0)]
+    # came_from not needed because the path itself stores predecessors
 
     while stack:
         if _handle_quit():
             return False
 
-        current, depth = stack.pop()
+        path, depth = stack.pop()
+        current = path[-1]
 
         if current == end:
-            # reconstruct path
-            while current in came_from:
-                current = came_from[current]
-                if current != start:
-                    current.make_path()
+            # mark path (skip start)
+            for spot in path[:-1]:
+                if spot != start and spot != end:
+                    spot.make_path()
                     draw()
             end.make_end()
             start.make_start()
@@ -226,11 +220,12 @@ def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
 
         if depth < limit:
             for neighbor in current.neighbors:
-                if neighbor not in visited and not neighbor.is_barrier():
-                    visited.add(neighbor)
-                    came_from[neighbor] = current
-                    stack.append((neighbor, depth + 1))
-                    neighbor.make_open()
+                if neighbor in path or neighbor.is_barrier():
+                    continue
+                # push a new path with neighbor appended
+                new_path = path + [neighbor]
+                stack.append((new_path, depth + 1))
+                neighbor.make_open()
 
         draw()
         if current != start:
@@ -239,7 +234,7 @@ def dls(draw: callable, grid: Grid, start: Spot, end: Spot, limit: int) -> bool:
     return False
     pass
 
-# ▢ Uninformed Cost Search (UCS)
+#5 ▢ Uninformed Cost Search (UCS)
 def ucs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     Uninformed Cost Search (UCS) Algorithm.
@@ -295,7 +290,7 @@ def ucs(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     return False
 
     pass
-# ▢ Greedy Search
+#6 ▢ Greedy Search
 def greedy_search(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     Greedy Best-First Search Algorithm.
@@ -349,18 +344,11 @@ def greedy_search(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     return False
     pass
 
-# ▢ Iterative Deepening Search/Iterative Deepening Depth-First Search (IDS/IDDFS)
+#7 ▢ Iterative Deepening Search/Iterative Deepening Depth-First Search (IDS/IDDFS)
 def ids(draw: callable, grid: Grid, start: Spot, end: Spot, max_depth: int) -> bool:
     """
     Iterative Deepening Search (IDS) Algorithm.
-    Args:
-        draw (callable): Function to update the Pygame window.
-        grid (Grid): The Grid object containing the spots.
-        start (Spot): The starting spot.
-        end (Spot): The ending spot.
-        max_depth (int): The maximum depth limit for the search.
-    Returns:
-        bool: True if a path is found, False otherwise.
+    Performs a series of depth-limited DFS passes up to max_depth.
     """
     for depth in range(max_depth + 1):
         stack = [(start, 0)]
@@ -374,7 +362,6 @@ def ids(draw: callable, grid: Grid, start: Spot, end: Spot, max_depth: int) -> b
             current, curr_depth = stack.pop()
 
             if current == end:
-                # reconstruct path
                 while current in came_from:
                     current = came_from[current]
                     if current != start:
@@ -397,8 +384,8 @@ def ids(draw: callable, grid: Grid, start: Spot, end: Spot, max_depth: int) -> b
                 current.make_closed()
 
     return False
-    pass
-# ▢ Iterative Deepening A* (IDA)
+
+# 8 ▢ Iterative Deepening A* (IDA)
 def ida(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
     """
     Iterative Deepening A* (IDA*) Algorithm.
